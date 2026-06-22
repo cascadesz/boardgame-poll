@@ -1,5 +1,5 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbzLgECYjG4Io_Q1RTgJQoUh6FMpj0r_yBshP7ldMlmzgChDgdoOv2pwdoBfQcsrppk9/exec';
-const VERSION = 'v1.0.2';
+const VERSION = 'v1.0.3';
 
 const voteForm = document.getElementById('voteForm');
 const messageEl = document.getElementById('message');
