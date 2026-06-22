@@ -187,9 +187,29 @@ li {
   margin-top: 4px;
 }
 
+
+.datetime-pickers {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.datetime-pickers select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #0b1220;
+  color: var(--text);
+}
+
 @media (max-width: 768px) {
   .summary-grid,
   .results-columns {
     grid-template-columns: 1fr;
   }
+  
+
+  
 }

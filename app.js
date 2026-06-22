@@ -5,7 +5,9 @@ const messageEl = document.getElementById('message');
 const refreshBtn = document.getElementById('refreshBtn');
 
 const proposedTimeWrap = document.getElementById('proposedTimeWrap');
-const proposedTimeInput = document.getElementById('proposedTime');
+const proposedDate = document.getElementById('proposedDate');
+const proposedHour = document.getElementById('proposedHour');
+const proposedMinute = document.getElementById('proposedMinute');
 
 const yesCount = document.getElementById('yesCount');
 const maybeCount = document.getElementById('maybeCount');
@@ -15,15 +17,60 @@ const yesList = document.getElementById('yesList');
 const maybeList = document.getElementById('maybeList');
 const proposeList = document.getElementById('proposeList');
 
+function populateDateOptions() {
+  proposedDate.innerHTML = '';
+
+  const today = new Date();
+
+  for (let i = 0; i < 14; i++) {
+    const d = new Date();
+    d.setDate(today.getDate() + i);
+
+    const value = formatDateValue(d);
+    const label = d.toLocaleDateString(undefined, {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+
+    proposedDate.innerHTML += `<option value="${value}">${label}</option>`;
+  }
+}
+
+function populateHourOptions() {
+  proposedHour.innerHTML = '';
+
+  for (let h = 0; h < 24; h++) {
+    const hh = String(h).padStart(2, '0');
+    proposedHour.innerHTML += `<option value="${hh}">${hh}</option>`;
+  }
+  
+  proposedHour.value = '19';
+}
+
+function formatDateValue(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function buildProposedDateTime() {
+  if (!proposedDate.value || !proposedHour.value || !proposedMinute.value) {
+    return '';
+  }
+  return `${proposedDate.value}T${proposedHour.value}:${proposedMinute.value}`;
+}
+``
+
 document.querySelectorAll('input[name="choice"]').forEach(radio => {
   radio.addEventListener('change', () => {
     if (radio.value === 'Propose new time' && radio.checked) {
       proposedTimeWrap.classList.remove('hidden');
-      proposedTimeInput.required = true;
     } else if (radio.checked) {
       proposedTimeWrap.classList.add('hidden');
-      proposedTimeInput.required = false;
-      proposedTimeInput.value = '';
+      proposedMinute.value = '00';
     }
   });
 });
@@ -35,7 +82,7 @@ voteForm.addEventListener('submit', async (e) => {
   const formData = new FormData(voteForm);
   const name = formData.get('name')?.trim() || '';
   const choice = formData.get('choice') || '';
-  const proposedTime = formData.get('proposedTime') || '';
+const proposedTime = buildProposedDateTime();
 
   try {
     const body = new URLSearchParams();
@@ -58,7 +105,10 @@ voteForm.addEventListener('submit', async (e) => {
     messageEl.textContent = 'Vote saved successfully.';
     voteForm.reset();
     proposedTimeWrap.classList.add('hidden');
-    proposedTimeInput.required = false;
+    populateDateOptions();
+    populateHourOptions();
+    proposedMinute.value = '00';
+
 
     renderResults(data.rows || []);
   } catch (err) {
@@ -127,5 +177,8 @@ function escapeHtml(str) {
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
 }
+
+populateDateOptions();
+populateHourOptions();
 
 loadResults();

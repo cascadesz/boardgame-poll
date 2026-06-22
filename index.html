@@ -45,10 +45,30 @@
           </label>
         </fieldset>
 
-        <div id="proposedTimeWrap" class="hidden">
-          <label for="proposedTime">Suggested new time</label>
-          <input id="proposedTime" name="proposedTime" type="datetime-local" />
-        </div>
+<div id="proposedTimeWrap" class="hidden">
+  <label>Suggested new time</label>
+
+  <div class="datetime-pickers">
+    <div>
+      <label for="proposedDate">Date</label>
+      <select id="proposedDate" name="proposedDate"></select>
+    </div>
+
+    <div>
+      <label for="proposedHour">Hour</label>
+      <select id="proposedHour" name="proposedHour"></select>
+    </div>
+
+    <div>
+      <label for="proposedMinute">Minute</label>
+      <select id="proposedMinute" name="proposedMinute">
+        <option value="00">00</option>
+        <option value="30">30</option>
+      </select>
+    </div>
+  </div>
+</div>
+``
 
         <button type="submit">Submit vote</button>
       </form>
