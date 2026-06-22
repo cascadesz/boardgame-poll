@@ -305,9 +305,9 @@ async function displayPdfList() {
   }
   
   pdfList.innerHTML = pdfs.map((pdf, index) => `
-    <div style="margin: 8px 0; padding: 8px; background-color: white; border-radius: 4px; display: flex; align-items: center; justify-content: space-between;">
-      <span style="font-size: 14px;">📄 ${escapeHtml(pdf)}</span>
-      <a href="script/${encodeURIComponent(pdf)}" download style="padding: 6px 12px; background-color: #28a745; color: white; text-decoration: none; border-radius: 3px; font-size: 12px; cursor: pointer;">Download</a>
+    <div style="margin: 8px 0; padding: 10px; background-color: #f0f7ff; border: 1px solid #0066cc; border-radius: 4px; display: flex; align-items: center; justify-content: space-between;">
+      <span style="font-size: 14px; font-weight: 500; color: #000;">📄 ${escapeHtml(pdf)}</span>
+      <a href="script/${encodeURIComponent(pdf)}" download style="padding: 6px 12px; background-color: #0066cc; color: white; text-decoration: none; border-radius: 3px; font-size: 12px; cursor: pointer;">Download</a>
     </div>
   `).join('');
   
