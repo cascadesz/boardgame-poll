@@ -227,7 +227,7 @@ li {
 }
 
 .scroll-picker::-webkit-scrollbar {
-  width: 6px;
+  width: 18px;
 }
 
 .scroll-picker::-webkit-scrollbar-track {

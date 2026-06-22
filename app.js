@@ -28,20 +28,25 @@ function populateDateOptions() {
 
     const value = formatDateValue(d);
     const label = d.toLocaleDateString(undefined, {
-      weekday: 'short',
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long'
     });
 
-    proposedDate.innerHTML += `<option value="${value}">${label}</option>`;
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    if (i === 4) {
+      option.selected = true;
+    }
+    proposedDate.appendChild(option);
   }
 }
 
 function populateHourOptions() {
   proposedHour.innerHTML = '';
 
-  for (let h = 0; h < 24; h++) {
+  for (let h = 17; h <= 20; h++) {
     const hh = String(h).padStart(2, '0');
     const item = document.createElement('div');
     item.className = 'picker-item';
@@ -57,9 +62,9 @@ function populateHourOptions() {
   
   // Scroll to 19 (hour)
   const items = proposedHour.querySelectorAll('.picker-item');
-  if (items[19]) {
+  if (items[2]) {
     setTimeout(() => {
-      items[19].scrollIntoView({ behavior: 'auto', block: 'center' });
+      items[2].scrollIntoView({ behavior: 'auto', block: 'center' });
       updatePickerSelection(proposedHour);
     }, 0);
   }
