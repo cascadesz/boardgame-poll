@@ -111,7 +111,6 @@ function buildProposedDateTime() {
   }
   return `${proposedDate.value}T${hour}:${minute}`;
 }
-``
 
 document.querySelectorAll('input[name="choice"]').forEach(radio => {
   radio.addEventListener('change', () => {
