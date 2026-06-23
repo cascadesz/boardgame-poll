@@ -278,6 +278,11 @@ if (versionBadge) {
 const pdfDownloadBtn = document.getElementById('pdfDownloadBtn');
 const pdfList = document.getElementById('pdfList');
 
+function updateDownloadToggle(expanded) {
+  pdfDownloadBtn.textContent = expanded ? '📄 Download Script ▴' : '📄 Download Script ▾';
+  pdfDownloadBtn.setAttribute('aria-expanded', String(expanded));
+}
+
 // Try to load PDF list from a JSON manifest file
 async function loadPdfList() {
   try {
@@ -291,39 +296,31 @@ async function loadPdfList() {
   }
   
   // Fallback: Try to fetch individual PDFs (this won't work on all servers)
-  const commonNames = ['script', 'Script', 'SCRIPT'];
   return [];
 }
 
-async function displayPdfList() {
+async function renderPdfList() {
   const pdfs = await loadPdfList();
   
   if (pdfs.length === 0) {
     pdfList.innerHTML = '<p style="color: #666; font-size: 12px; margin: 8px 0 0 0;">No scripts available. Add PDF files to the <code>script/</code> folder and create a <code>script/pdfs.json</code> file with a list of filenames.</p>';
-    pdfList.style.display = 'block';
     return;
   }
   
   pdfList.innerHTML = pdfs.map((pdf, index) => `
-    <div class="pdf-item" style="margin: 8px 0; padding: 10px; background-color: #f0f7ff; border: 1px solid #0066cc; border-radius: 4px;">
-      <div class="pdf-item-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-        <button type="button" class="qr-toggle-btn" data-file="${encodeURIComponent(pdf)}" title="Generate QR code" aria-label="Generate QR code" style="background-color: #0f172a; border: none; padding: 8px; cursor: pointer; color: white; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; min-width: 38px; min-height: 38px;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 3h8v8H3V3zm2 2v4h4V5H5zm8 0h2v2h-2V5zm0 4h2v2h-2V9zm4-4h2v2h-2V5zm-4 4h4v4h-4V9zm0 6h2v2h-2v-2zm4-2h2v2h-2v-2zm-8 4h2v2H5v-2zm2 0h4v4H7v-4z"/></svg>
-        </button>
-        <span style="font-size: 14px; font-weight: 500; color: #000; flex: 1 1 auto; margin: 0 12px;">📄 ${escapeHtml(pdf)}</span>
-        <a href="script/${encodeURIComponent(pdf)}" download title="Download" aria-label="Download" style="background-color: #0066cc; color: white; text-decoration: none; border: none; padding: 8px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; min-width: 38px; min-height: 38px;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 20h14v-2H5v2zm7-11v10h2V9h3l-4-4-4 4h3z"/></svg>
-        </a>
+    <div class="pdf-item">
+      <div class="pdf-item-row">
+        <div class="pdf-file-info">
+          <span class="pdf-file-name">📄 ${escapeHtml(pdf)}</span>
+        </div>
+        <div class="pdf-actions">
+          <button type="button" class="qr-toggle-btn" data-file="${encodeURIComponent(pdf)}" title="Generate QR code" aria-label="Generate QR code">QR code</button>
+          <a href="script/${encodeURIComponent(pdf)}" download title="Download" aria-label="Download">Download</a>
+        </div>
       </div>
-      <div class="qr-container" id="qr-${index}" style="display: none; margin-top: 10px;">
-      </div>
+      <div class="qr-container" id="qr-${index}" style="display: none; margin-top: 10px;"></div>
     </div>
   `).join('');
-
-  pdfList.style.display = 'block';
-  pdfList.style.backgroundColor = '#e8e8e8';
-  pdfList.style.padding = '10px';
-  pdfList.style.borderRadius = '4px';
 
   pdfList.querySelectorAll('.qr-toggle-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -333,6 +330,16 @@ async function displayPdfList() {
       togglePdfQr(container, pdf);
     });
   });
+}
+
+async function togglePdfList() {
+  const expanded = !pdfList.classList.contains('expanded');
+  pdfList.classList.toggle('expanded', expanded);
+  pdfList.classList.toggle('collapsed', !expanded);
+  updateDownloadToggle(expanded);
+  if (expanded) {
+    await renderPdfList();
+  }
 }
 
 function getPdfDownloadUrl(pdf) {
@@ -365,7 +372,7 @@ function togglePdfQr(container, pdf) {
   container.style.display = 'block';
 }
 
-pdfDownloadBtn.addEventListener('click', displayPdfList);
+pdfDownloadBtn.addEventListener('click', togglePdfList);
 
-displayPdfList();
+updateDownloadToggle(false);
 loadResults();
