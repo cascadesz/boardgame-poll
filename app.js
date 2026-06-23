@@ -312,7 +312,7 @@ async function displayPdfList() {
         </button>
         <span style="font-size: 14px; font-weight: 500; color: #000; flex: 1 1 auto; margin: 0 12px;">📄 ${escapeHtml(pdf)}</span>
         <a href="script/${encodeURIComponent(pdf)}" download title="Download" aria-label="Download" style="background: none; border: none; padding: 0; cursor: pointer; color: #0066cc; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 20h14v-2H5v2zm7-18L5.33 9h3.34v4h4.66V9h3.34L12 2z"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 20h14v-2H5v2zm7-11v10h2V9h3l-4-4-4 4h3z"/></svg>
         </a>
       </div>
       <div class="qr-container" id="qr-${index}" style="display: none; margin-top: 10px;">
@@ -340,7 +340,7 @@ function getPdfDownloadUrl(pdf) {
 }
 
 function getQrImageUrl(downloadUrl) {
-  return `https://chart.googleapis.com/chart?cht=qr&chs=220x220&chl=${encodeURIComponent(downloadUrl)}&choe=UTF-8`;
+  return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(downloadUrl)}`;
 }
 
 function togglePdfQr(container, pdf) {
