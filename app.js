@@ -281,7 +281,7 @@ const pdfList = document.getElementById('pdfList');
 // Try to load PDF list from a JSON manifest file
 async function loadPdfList() {
   try {
-    const response = await fetch('script/pdfs.json');
+    const response = await fetch('script/pdfs.json', { cache: 'no-store' });
     if (response.ok) {
       const data = await response.json();
       return (data.files || []).sort();
@@ -307,11 +307,11 @@ async function displayPdfList() {
   pdfList.innerHTML = pdfs.map((pdf, index) => `
     <div class="pdf-item" style="margin: 8px 0; padding: 10px; background-color: #f0f7ff; border: 1px solid #0066cc; border-radius: 4px;">
       <div class="pdf-item-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-        <button type="button" class="qr-toggle-btn" data-file="${encodeURIComponent(pdf)}" title="Generate QR code" aria-label="Generate QR code" style="background: none; border: none; padding: 0; cursor: pointer; color: #0f172a; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;">
+        <button type="button" class="qr-toggle-btn" data-file="${encodeURIComponent(pdf)}" title="Generate QR code" aria-label="Generate QR code" style="background-color: #0f172a; border: none; padding: 8px; cursor: pointer; color: white; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; min-width: 38px; min-height: 38px;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 3h8v8H3V3zm2 2v4h4V5H5zm8 0h2v2h-2V5zm0 4h2v2h-2V9zm4-4h2v2h-2V5zm-4 4h4v4h-4V9zm0 6h2v2h-2v-2zm4-2h2v2h-2v-2zm-8 4h2v2H5v-2zm2 0h4v4H7v-4z"/></svg>
         </button>
         <span style="font-size: 14px; font-weight: 500; color: #000; flex: 1 1 auto; margin: 0 12px;">📄 ${escapeHtml(pdf)}</span>
-        <a href="script/${encodeURIComponent(pdf)}" download title="Download" aria-label="Download" style="background: none; border: none; padding: 0; cursor: pointer; color: #0066cc; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;">
+        <a href="script/${encodeURIComponent(pdf)}" download title="Download" aria-label="Download" style="background-color: #0066cc; color: white; text-decoration: none; border: none; padding: 8px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; min-width: 38px; min-height: 38px;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 20h14v-2H5v2zm7-11v10h2V9h3l-4-4-4 4h3z"/></svg>
         </a>
       </div>
@@ -367,4 +367,5 @@ function togglePdfQr(container, pdf) {
 
 pdfDownloadBtn.addEventListener('click', displayPdfList);
 
+displayPdfList();
 loadResults();
