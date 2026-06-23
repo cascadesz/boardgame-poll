@@ -5,22 +5,42 @@ const path = require('path');
 
 const scriptDir = path.join(__dirname, 'script');
 const outputPath = path.join(scriptDir, 'pdfs.json');
+let lastFiles = [];
+
+function getPdfFiles() {
+  return fs.readdirSync(scriptDir)
+    .filter(file => file.toLowerCase().endsWith('.pdf'))
+    .sort();
+}
+
+function arraysEqual(a, b) {
+  if (a.length !== b.length) return false;
+  return a.every((value, index) => value === b[index]);
+}
+
+function writeManifest(files) {
+  const content = { files };
+  fs.writeFileSync(outputPath, JSON.stringify(content, null, 2));
+}
 
 function generate() {
   if (!fs.existsSync(scriptDir)) {
     console.error(`Script directory not found: ${scriptDir}`);
-    return;
+    return [];
   }
 
-  const files = fs.readdirSync(scriptDir)
-    .filter(file => file.toLowerCase().endsWith('.pdf'))
-    .sort(); // Sort alphabetically
+  const files = getPdfFiles();
 
-  const content = { files };
-  fs.writeFileSync(outputPath, JSON.stringify(content, null, 2));
+  if (arraysEqual(files, lastFiles) && fs.existsSync(outputPath)) {
+    return files;
+  }
+
+  writeManifest(files);
+  lastFiles = files;
 
   console.log(`✅ Generated pdfs.json with ${files.length} PDF(s):`);
   files.forEach(f => console.log(`   - ${f}`));
+  return files;
 }
 
 // Basic CLI: run once, or use --watch to regenerate on changes
@@ -32,11 +52,10 @@ generate();
 if (watch) {
   console.log('👀 Watching script/ for changes...');
   let timeout = null;
+
   fs.watch(scriptDir, { persistent: true }, (eventType, filename) => {
-    // Ignore changes to the manifest file itself to avoid an infinite loop
     if (filename && String(filename).toLowerCase() === 'pdfs.json') return;
 
-    // Debounce rapid events
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(() => {
       try {
@@ -47,4 +66,16 @@ if (watch) {
       }
     }, 150);
   });
+
+  setInterval(() => {
+    try {
+      const files = getPdfFiles();
+      if (!arraysEqual(files, lastFiles)) {
+        console.log('Detected manifest mismatch -> regenerating pdfs.json');
+        generate();
+      }
+    } catch (err) {
+      console.error('Error polling PDF directory:', err);
+    }
+  }, 2500);
 }
