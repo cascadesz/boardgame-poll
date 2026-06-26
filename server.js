@@ -52,62 +52,83 @@ function parseMultipartFile(req) {
       try {
         const body = Buffer.concat(chunks);
         const contentType = req.headers['content-type'] || '';
-        const boundaryMatch = contentType.match(/boundary=(.+)$/i);
+        const boundaryMatch = contentType.match(/boundary=(?:"([^"]+)"|([^;]+))/i);
 
         if (!boundaryMatch) {
           reject(new Error('Missing multipart boundary'));
           return;
         }
 
-        const boundary = boundaryMatch[1].trim();
-        const delimiter = Buffer.from(`--${boundary}`);
-        const delimiterWithNewline = Buffer.from(`--${boundary}\r\n`);
-        const closingDelimiter = Buffer.from(`--${boundary}--`);
+        const boundary = (boundaryMatch[1] || boundaryMatch[2] || '').trim();
+        if (!boundary) {
+          reject(new Error('Missing multipart boundary'));
+          return;
+        }
 
-        let start = body.indexOf(delimiter);
+        const delimiter = Buffer.from(`--${boundary}`);
+        const start = body.indexOf(delimiter);
         if (start === -1) {
           reject(new Error('Invalid multipart body'));
           return;
         }
 
-        start += delimiter.length;
-        const multipartBody = body.slice(start);
+        let searchIndex = start + delimiter.length;
         const parts = [];
-        let searchIndex = 0;
 
-        while (searchIndex < multipartBody.length) {
-          const nextBoundary = multipartBody.indexOf(delimiter, searchIndex);
+        while (searchIndex < body.length) {
+          const nextBoundary = body.indexOf(delimiter, searchIndex);
           if (nextBoundary === -1) {
             break;
           }
 
-          const part = multipartBody.slice(searchIndex, nextBoundary);
+          const part = body.slice(searchIndex, nextBoundary);
           if (part.length > 0) {
             parts.push(part);
           }
 
           searchIndex = nextBoundary + delimiter.length;
-          if (multipartBody.slice(searchIndex, searchIndex + 2).equals(Buffer.from('--'))) {
+          if (body.subarray(searchIndex, searchIndex + 2).equals(Buffer.from('--'))) {
             break;
           }
         }
 
-        const filePart = parts.find(part => part.toString('latin1').includes('filename='));
+        const filePart = parts.find(part => {
+          const normalized = part.slice(0, Math.min(part.length, 200));
+          return normalized.toString('latin1').includes('filename=');
+        });
+
         if (!filePart) {
           reject(new Error('No file part found in upload'));
           return;
         }
 
-        const headerSeparator = filePart.indexOf(Buffer.from('\r\n\r\n'));
+        let normalizedPart = filePart;
+        if (normalizedPart.length >= 2 && normalizedPart[0] === 0x0d && normalizedPart[1] === 0x0a) {
+          normalizedPart = normalizedPart.subarray(2);
+        } else if (normalizedPart.length >= 1 && normalizedPart[0] === 0x0a) {
+          normalizedPart = normalizedPart.subarray(1);
+        }
+
+        let headerSeparator = normalizedPart.indexOf(Buffer.from('\r\n\r\n'));
+        let separatorLength = 4;
+        if (headerSeparator === -1) {
+          headerSeparator = normalizedPart.indexOf(Buffer.from('\n\n'));
+          separatorLength = 2;
+        }
+
         if (headerSeparator === -1) {
           reject(new Error('Malformed multipart part'));
           return;
         }
 
-        const headers = filePart.slice(0, headerSeparator).toString('latin1');
-        let fileBuffer = filePart.slice(headerSeparator + 4);
-        if (fileBuffer.length >= 2 && fileBuffer.slice(-2).equals(Buffer.from('\r\n'))) {
-          fileBuffer = fileBuffer.slice(0, -2);
+        const headers = normalizedPart.subarray(0, headerSeparator).toString('latin1');
+        let fileBuffer = normalizedPart.subarray(headerSeparator + separatorLength);
+
+        while (fileBuffer.length >= 2 && fileBuffer[fileBuffer.length - 2] === 0x0d && fileBuffer[fileBuffer.length - 1] === 0x0a) {
+          fileBuffer = fileBuffer.subarray(0, -2);
+        }
+        if (fileBuffer.length >= 1 && fileBuffer[fileBuffer.length - 1] === 0x0a) {
+          fileBuffer = fileBuffer.subarray(0, -1);
         }
 
         const dispositionMatch = headers.match(/name="([^"]+)"(?:;\s*filename="([^"]*)")?/i);

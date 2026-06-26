@@ -407,7 +407,10 @@ if (uploadPdfForm) {
       uploadPdfForm.reset();
       await renderPdfList();
     } catch (error) {
-      uploadMessage.textContent = `Error: ${error.message}`;
+      const message = error instanceof Error && error.message
+        ? error.message
+        : 'Unable to reach the upload server. Make sure the app is running with npm start.';
+      uploadMessage.textContent = `Error: ${message}`;
     }
   });
 }
