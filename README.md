@@ -44,5 +44,3 @@ The workspace is organized around a lightweight web application and supporting d
 - server.js — server entry point for serving the app locally
 - index.html — main page for registration and community-facing views
 - styles.css — styling for the user interface
-- script/pdfs.json — data source used by supporting scripts
-- generate-pdfs-list.js — utility script for generating or maintaining supporting lists/data
