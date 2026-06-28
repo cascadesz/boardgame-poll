@@ -373,5 +373,6 @@ if (pdfDownloadBtn) {
   pdfDownloadBtn.addEventListener('click', togglePdfList);
 }
 
-updateDownloadToggle(false);
+updateDownloadToggle(true);
+renderPdfList();
 loadResults();
