@@ -373,6 +373,9 @@ if (pdfDownloadBtn) {
   pdfDownloadBtn.addEventListener('click', togglePdfList);
 }
 
-updateDownloadToggle(true);
-renderPdfList();
+// Start with PDF list collapsed and avoid pre-rendering until expanded
+if (pdfList) {
+  pdfList.classList.add('collapsed');
+}
+updateDownloadToggle(false);
 loadResults();
